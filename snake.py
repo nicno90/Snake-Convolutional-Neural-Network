@@ -10,6 +10,8 @@ from pygame import (Rect)
 from sys import exit
 from pygame.locals import (K_DOWN, K_ESCAPE, K_LEFT,
                            K_RIGHT, K_UP, KEYDOWN, QUIT)
+import numpy as np
+import pandas
 
 
 class GameLogic:
@@ -24,6 +26,9 @@ class GameLogic:
             self.windowSizeY += self.gameUnitSize - self.windowSizeY % self.gameUnitSize
         self.window = pygame.display.set_mode(
             [self.windowSizeX, self.windowSizeY])
+        print('x:', self.windowSizeX)
+        print('y:', self.windowSizeY / 15)
+
         pygame.display.set_caption("Snake!")
         self.window.fill((0, 0, 0))
         pygame.font.init()
@@ -42,6 +47,15 @@ class GameLogic:
         self.last_score = -1
         self.snakeDirections = {
             'left': (-1, 0), 'right': (1, 0), 'up': (0, -1), 'down': (0, 1)}
+
+        # Game Map Array
+        # Black = 'E'
+        # Red   = 'H'
+        # White = 'S'
+        # Green = 'F'
+        self.grid_size = ((self.windowSizeX // 15), (self.windowSizeY // 15))
+        self.game_map = np.chararray(self.grid_size)
+        self.game_map[:] = 'E'
 
         self.previousDirection = self.snakeDirections.get('left')
         self._readyScreen()
@@ -123,8 +137,17 @@ class GameLogic:
     def killSnake(self):
         self._gameOverScreen()
 
+    def set_game_map(self, link, val):
+        gx = (link.x // 15) 
+        gy = (link.y // 15)
+        self.game_map[gy, gx] = val
+        print(val, ':\n', self.game_map[gy, gx])
+        
+
     def _update(self):
         self.window.fill((0, 0, 0))
+        self.game_map = np.chararray(self.grid_size)
+        self.game_map[:] = 'E'
 
         if (self.intersect() == True):
             self.appendSnake()
@@ -137,19 +160,18 @@ class GameLogic:
             if head:
                 pygame.draw.rect(self.window, (255, 0, 0), link)
                 head = False
+                self.set_game_map(link, 'H')
             else:
                 pygame.draw.rect(self.window, (255, 255, 255), link)
+                self.set_game_map(link, 'S')
         pygame.draw.rect(self.window, (102, 255, 51), self.food)
+        self.set_game_map(self.food, 'F')
 
-        # self.scoreText = self.font.render(
-        #     f"Score: {self.score}", True, (255, 255, 255))
-        # self.scoreTextRect = self.scoreText.get_rect(center=(40, 10))
-        # self.window.blit(self.scoreText, self.scoreTextRect)
         if self.score > self.last_score:
             self.last_score = self.score
             pygame.display.set_caption(f"Snake! Score: {self.score}")
-            print(f'Score: {self.score}')
-
+            print(f'Score: {self.score}') # For Console
+        print(pandas.DataFrame(data = self.game_map[:, :]))
         pygame.display.update()
 
     def _input(self):
@@ -157,6 +179,8 @@ class GameLogic:
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     exit()
+            if event.type == pygame.QUIT:
+                exit()
         keys = pygame.key.get_pressed()
         if (keys[K_LEFT] and self.previousDirection != self.snakeDirections.get('right')):
             self.moveSnake(self.snakeDirections.get('left'))
@@ -190,6 +214,7 @@ class GameLogic:
                 self.previousDirection = self.snakeDirections.get('down')
                 break
             pygame.display.update()
+            
 
     def _gameOverScreen(self):
         while True:
