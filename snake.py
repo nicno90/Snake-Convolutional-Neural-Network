@@ -3,6 +3,8 @@
 
 
 from random import randint
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
 from pygame import (Rect)
 from sys import exit
@@ -129,9 +131,13 @@ class GameLogic:
             self.score += 1
         elif (self.snakeCollidingWithWall() == True or self.snakeCollidingWithSelf() == True):
             self.killSnake()
-
+        head = True
         for link in self.snake:
-            pygame.draw.rect(self.window, (255, 255, 255), link)
+            if head:
+                pygame.draw.rect(self.window, (255, 0, 0), link)
+                head = False
+            else:
+                pygame.draw.rect(self.window, (255, 255, 255), link)
         pygame.draw.rect(self.window, (102, 255, 51), self.food)
 
         self.scoreText = self.font.render(
@@ -184,7 +190,7 @@ class GameLogic:
         while True:
             self.window.fill((0, 0, 0))
             self.text = self.font.render(
-                f"Game Over, Score: {self.score}", True, (255, 255, 255))
+                f"Game Over (ESC), Score: {self.score} ", True, (255, 255, 255))
             self.startTextRect = self.text.get_rect(
                 center=(self.windowSizeX/2, self.windowSizeY/2))
             self.window.blit(self.text, self.startTextRect)
@@ -204,8 +210,9 @@ class GameLogic:
 class LeaderBoard:
 
     def __init__(self):
+        self.saveFile = "leaderboard.txt"
         # needs to be changed to relative path
-        file = open("C:\git\hmt\Learning\leaderboard.txt", "r")
+        file = open(self.saveFile, "r")
         self.leaderboard = []
         i = 0
         while i < 5:
@@ -225,14 +232,15 @@ class LeaderBoard:
                 self.leaderboard.remove(score)
                 self.leaderboard.insert(i, newScore)
             i += 1
-        file = open("C:\git\hmt\Learning\leaderboard.txt", "w")
+        file = open(self.saveFile, "w")
         # add name and score
         file.close()
 
 
 def main():
     #l = LeaderBoard()
-    game = GameLogic(250, 250)
+    game = GameLogic(500, 500)
+
 
 
 main()
