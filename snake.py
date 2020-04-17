@@ -37,8 +37,9 @@ class GameLogic:
         self.food = self.createFood()
         self.speed = 15
         self.score = 0
-        self.scoreText = self.font.render(
-            f"Score: {self.score}", True, (255, 255, 255), None)
+        # self.scoreText = self.font.render(
+        #     f"Score: {self.score}", True, (255, 255, 255), None)
+        self.last_score = -1
         self.snakeDirections = {
             'left': (-1, 0), 'right': (1, 0), 'up': (0, -1), 'down': (0, 1)}
 
@@ -140,10 +141,14 @@ class GameLogic:
                 pygame.draw.rect(self.window, (255, 255, 255), link)
         pygame.draw.rect(self.window, (102, 255, 51), self.food)
 
-        self.scoreText = self.font.render(
-            f"Score: {self.score}", True, (255, 255, 255))
-        self.scoreTextRect = self.scoreText.get_rect(center=(40, 10))
-        self.window.blit(self.scoreText, self.scoreTextRect)
+        # self.scoreText = self.font.render(
+        #     f"Score: {self.score}", True, (255, 255, 255))
+        # self.scoreTextRect = self.scoreText.get_rect(center=(40, 10))
+        # self.window.blit(self.scoreText, self.scoreTextRect)
+        if self.score > self.last_score:
+            self.last_score = self.score
+            pygame.display.set_caption(f"Snake! Score: {self.score}")
+            print(f'Score: {self.score}')
 
         pygame.display.update()
 
